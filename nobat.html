@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🗓️ نوبت‌دهی آنلاین | مرکز ذهن آگاه</title>
+    
+    <style>
+        /* تنظیمات عمومی و فونت فارسی */
+        body {
+            direction: rtl; 
+            font-family: Tahoma, 'B Koodak', sans-serif; 
+            margin: 0;
+            padding: 0;
+            background-color: #f0f4f7;
+            color: #333;
+        }
+
+        /* هدر وبسایت */
+        .header {
+            background-color: #006f79; 
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .header h1 { margin: 0 0 5px 0; font-size: 2.2rem; letter-spacing: 1px; }
+        .header p { font-size: 1rem; opacity: 0.9; }
+
+        /* محفظه اصلی و کارت نوبت دهی */
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        .section-card {
+            padding: 30px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .section-card h2 {
+            color: #00796b;
+            border-bottom: 2px solid #e0f2f1;
+            padding-bottom: 15px;
+            margin-top: 0;
+            text-align: center;
+        }
+
+        /* استایل فرم نوبت‌دهی */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #004d40;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #b2dfdb;
+            border-radius: 6px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: #00796b;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 121, 107, 0.3);
+        }
+
+        /* استایل دکمه */
+        .btn-submit {
+            background-color: #00796b;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: background-color 0.3s, transform 0.1s;
+            width: 100%;
+        }
+        .btn-submit:hover {
+            background-color: #004d40;
+            transform: translateY(-2px);
+        }
+        .btn-submit:disabled {
+            background-color: #a7a7a7;
+            cursor: not-allowed;
+        }
+
+        /* استایل پیام‌ها */
+        .message-box {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .message-success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
+            font-weight: bold;
+        }
+        .message-error {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef9a9a;
+            font-weight: bold;
+        }
+
+        /* کارت نوبت دهی تاییدیه */
+        .appointment-card {
+            border: 2px solid #00796b;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 25px;
+            background-color: #f0ffff;
+            box-shadow: 0 4px 10px rgba(0, 121, 107, 0.1);
+            text-align: right; 
+        }
+        .appointment-card h3 {
+            color: #004d40;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+        }
+        .appointment-card div {
+            padding: 8px 0;
+            border-bottom: 1px dashed #b2dfdb;
+            display: flex;
+            justify-content: space-between;
+        }
+        .appointment-card div:last-child {
+            border-bottom: none;
+        }
+        .appointment-card strong {
+            color: #00796b;
+        }
+
+        /* فوتر */
+        .footer { text-align: center; padding: 20px; background-color: #333; color: white; margin-top: 40px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>🗓️ سیستم نوبت‌دهی آنلاین</h1>
+        <p>لطفاً فرم زیر را برای رزرو نوبت تکمیل کنید.</p>
+    </header>
+
+    <main class="container">
+        <!-- بخش نوبت دهی مطب -->
+        <section id="appointment-section" class="section-card">
+            <h2>درخواست نوبت مشاوره حضوری</h2>
+            <p id="auth-status" class="message-error">در حال اتصال به سیستم نوبت‌دهی (لطفاً صبر کنید)...</p>
+
+            <form id="booking-form" style="display: none;">
+                <div class="form-group">
+                    <label for="fullName">نام و نام خانوادگی:</label>
+                    <input type="text" id="fullName" placeholder="مانند: علی حسینی" required>
+                </div>
+                <div class="form-group">
+                    <label for="phoneNumber">شماره تماس:</label>
+                    <input type="tel" id="phoneNumber" placeholder="۰۹۱۲xxxxxxx" required>
+                </div>
+                <div class="form-group">
+                    <label for="description">توضیح کوتاه در مورد مشکل (اختیاری):</label>
+                    <textarea id="description" rows="3" placeholder="مثلاً: اضطراب اجتماعی"></textarea>
+                </div>
+                
+                <button type="submit" class="btn-submit" id="book-button">درخواست نوبت مشاوره</button>
+                
+                <div id="booking-message"></div>
+            </form>
+        </section>
+    </main>
+
+  <footer class="footer">
+        <p>محمد جلیلوند | تلفن: 09021385669 | &copy; کلیه حقوق برای شرکت فناوران هوشمند الماس پارس محفوظ است.</p>
+    </footer>
+
+    <!-- Firebase Imports and Logic (MUST be type="module") -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, collection, query, limit, orderBy, serverTimestamp, setLogLevel, getDocs, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- متغیرهای عمومی Canvas (ضروری) ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        // تنظیمات فایربیس
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        setLogLevel('debug'); 
+
+        let currentUserId = null;
+
+        // عناصر UI
+        const authStatusElement = document.getElementById('auth-status');
+        const bookingForm = document.getElementById('booking-form');
+        const bookButton = document.getElementById('book-button');
+        const bookingMessageElement = document.getElementById('booking-message');
+        
+        // --- داده‌های ثابت نوبت‌دهی ---
+        const APPOINTMENT_ADDRESS = "شیراز . خیابان ملاصدرا .ساختمان مهر طبقه 2";
+        const APPOINTMENT_TIMES = ["10:00", "11:00", "12:00", "15:00", "16:00"]; // ساعات کاری
+        // روزهای کاری (0=یکشنبه تا 6=شنبه). 1 تا 4 یعنی دوشنبه تا پنج‌شنبه
+        const WORKING_DAYS = [1, 2, 3, 4]; 
+        
+        // مسیر Firestore (عمومی برای اشتراک گذاری نوبت ها بین کاربران)
+        const APPOINTMENTS_PATH = `artifacts/${appId}/public/data/appointments`;
+
+
+        // 1. توابع کمکی تاریخ
+        function toJalali(gregorianDate) {
+            // نمایش تاریخ شمسی با جزئیات روز و ماه
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            return gregorianDate.toLocaleDateString('fa-IR', options);
+        }
+
+        function getJalaliDay(gregorianDate) {
+            return gregorianDate.toLocaleDateString('fa-IR', { weekday: 'long' });
+        }
+
+        function isWorkingDay(date) {
+            const dayOfWeek = date.getDay(); 
+            return WORKING_DAYS.includes(dayOfWeek);
+        }
+
+        function addDays(date, days) {
+            const result = new Date(date);
+            result.setDate(result.getDate() + days);
+            return result;
+        }
+        
+        // 2. تابع ساخت کد عددی نوبت
+        function generateNumericId(length = 6) {
+            let result = '';
+            const characters = '0123456789';
+            const charactersLength = characters.length;
+            for (let i = 0; i < length; i++) {
+                // اطمینان از اینکه رقم اول صفر نباشد تا طول رشته حفظ شود
+                if (i === 0) {
+                    // برای رقم اول، عدد بین ۱ تا ۹
+                    result += characters.charAt(Math.floor(Math.random() * 9) + 1); 
+                } else {
+                    // برای بقیه ارقام، عدد بین ۰ تا ۹
+                    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+                }
+            }
+            return result;
+        }
+
+        // 3. منطق اصلی تخصیص نوبت
+        function getNextAvailableSlot(lastAppointmentTimestamp) {
+            // نوبت‌دهی باید از آینده شروع شود
+            let lastDate = new Date();
+            let lastTimeIndex = -1; 
+            
+            if (lastAppointmentTimestamp) {
+                lastDate = lastAppointmentTimestamp.toDate();
+                // پیدا کردن ایندکس زمانی نوبت آخر
+                const bookedTime = lastDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+                lastTimeIndex = APPOINTMENT_TIMES.findIndex(t => t === bookedTime);
+            }
+
+            let currentDate = new Date(lastDate);
+            currentDate.setHours(0, 0, 0, 0); 
+            
+            let nextTimeIndex = lastTimeIndex + 1;
+
+            // اگر نوبت آخر مال روز قبل بوده، یا هنوز نوبتی رزرو نشده، از نوبت اول امروز شروع می‌کنیم
+            if (lastTimeIndex === -1 || currentDate.getTime() < new Date().setHours(0,0,0,0)) {
+                currentDate = new Date(); // شروع از زمان حال
+                currentDate.setSeconds(0, 0); 
+                nextTimeIndex = 0;
+            } else if (nextTimeIndex > 0 && currentDate.getTime() < new Date().setHours(0,0,0,0)) {
+                 // اگر نوبت آخر مربوط به روزهای قبل است، از اولین ساعت روز بعد شروع کن
+                currentDate = addDays(currentDate, 1);
+                nextTimeIndex = 0;
+            }
+
+
+            // حلقه اصلی برای پیدا کردن روز کاری و ساعت مناسب
+            while (true) {
+                // اگر ساعت کاری روز تمام شده باشد، به روز بعد می‌رویم
+                if (nextTimeIndex >= APPOINTMENT_TIMES.length) {
+                    currentDate = addDays(currentDate, 1);
+                    nextTimeIndex = 0;
+                }
+
+                // اگر روز جاری روز کاری نبود، به روز بعد می‌رویم
+                if (!isWorkingDay(currentDate)) {
+                    currentDate = addDays(currentDate, 1);
+                    nextTimeIndex = 0; 
+                    continue; 
+                }
+                
+                const nextTime = APPOINTMENT_TIMES[nextTimeIndex];
+                const [hour, minute] = nextTime.split(':').map(Number);
+                
+                // تاریخ و زمان کامل نوبت پیشنهادی
+                let proposedDate = new Date(currentDate);
+                proposedDate.setHours(hour, minute, 0, 0);
+
+                // اطمینان از اینکه نوبت پیشنهادی در آینده است
+                if (proposedDate.getTime() > new Date().getTime()) {
+                    return proposedDate;
+                }
+                
+                // اگر نوبت پیشنهادی گذشته، به نوبت بعدی در همان روز می‌رویم
+                nextTimeIndex++;
+            }
+        }
+        
+        // 4. تابع نمایش پیام
+        function displayMessage(element, message, type = 'success') {
+            element.textContent = message;
+            element.className = `message-box message-${type}`;
+        }
+        
+        // 5. تابع اصلی رزرو نوبت
+        async function bookAppointment(event) {
+            event.preventDefault();
+            
+            if (!currentUserId) {
+                displayMessage(bookingMessageElement, "خطا: احراز هویت کاربر انجام نشده است.", 'error');
+                return;
+            }
+
+            bookButton.disabled = true;
+            bookButton.textContent = "در حال رزرو...";
+            bookingMessageElement.innerHTML = ''; 
+
+            try {
+                const fullName = document.getElementById('fullName').value;
+                const phoneNumber = document.getElementById('phoneNumber').value;
+                const description = document.getElementById('description').value;
+
+                if (!fullName || !phoneNumber) {
+                    throw new Error("لطفاً نام کامل و شماره تماس را وارد کنید.");
+                }
+
+                // مرحله اول: پیدا کردن آخرین نوبت رزرو شده
+                let lastAppointmentTimestamp = null;
+                const lastQuery = query(
+                    collection(db, APPOINTMENTS_PATH),
+                    orderBy('appointmentDate', 'desc'),
+                    limit(1)
+                );
+                
+                const querySnapshot = await getDocs(lastQuery);
+                if (!querySnapshot.empty) {
+                    lastAppointmentTimestamp = querySnapshot.docs[0].data().appointmentDate;
+                }
+
+                // مرحله دوم: محاسبه نوبت در دسترس بعدی
+                const nextDate = getNextAvailableSlot(lastAppointmentTimestamp);
+
+                // مرحله سوم: ساختار داده‌های نوبت جدید
+                const newAppointmentRef = doc(collection(db, APPOINTMENTS_PATH)); 
+                const appointmentData = {
+                    fullName,
+                    phoneNumber,
+                    description,
+                    userId: currentUserId,
+                    appointmentDate: nextDate, // تاریخ و زمان رزرو شده (Date Object)
+                    bookedAt: serverTimestamp(),
+                    appointmentId: generateNumericId(6), // کد نوبت ۶ رقمی عددی جدید
+                    address: APPOINTMENT_ADDRESS,
+                    status: 'Pending'
+                };
+                
+                // مرحله چهارم: ذخیره داده در Firestore
+                await setDoc(newAppointmentRef, appointmentData);
+
+                // مرحله پنجم: نمایش تاییدیه
+                displayMessage(bookingMessageElement, "نوبت شما با موفقیت رزرو شد!", 'success');
+                renderAppointmentCard(appointmentData);
+
+            } catch (error) {
+                console.error("Booking Error:", error);
+                let errorMessage = error.message || 'خطای ناشناخته در اتصال به پایگاه داده.';
+                if (errorMessage.includes("permission denied")) {
+                     errorMessage = "خطای دسترسی: احراز هویت شما کامل نیست یا قوانین امنیتی نقض شده است.";
+                }
+                displayMessage(bookingMessageElement, `خطا در رزرو نوبت: ${errorMessage}`, 'error');
+            } finally {
+                bookButton.disabled = false;
+                bookButton.textContent = "درخواست نوبت مشاوره";
+            }
+        }
+
+        // 6. تابع رندر کارت تاییدیه
+        function renderAppointmentCard(data) {
+            // data.appointmentDate در زمان ثبت موفق، یک آبجکت Date است، در زمان لود از فایربیس، یک Timestamp است.
+            const dateObj = data.appointmentDate.toDate ? data.appointmentDate.toDate() : data.appointmentDate; 
+            const jalaliDate = toJalali(dateObj);
+            // const dayName = getJalaliDay(dateObj); // حذف شد - نام روز در jalaliDate موجود است
+            const time = dateObj.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit', hour12: false }); 
+
+            const cardHtml = `
+                <div class="appointment-card">
+                    <h3>✅ تایید نوبت شما</h3>
+                    <div>
+                        <span>کد نوبت:</span>
+                        <strong>${data.appointmentId}</strong>
+                    </div>
+                    <div>
+                        <span>مشاور:</span>
+                        <span>دکتر سارا شفیعی</span>
+                    </div>
+                    <div>
+                        <span>تاریخ:</span>
+                        <span>${jalaliDate}</span>
+                    </div>
+                    <!-- نمایش روز حذف شد زیرا تابع toJalali آن را در قسمت 'تاریخ' لحاظ می‌کند -->
+                    <div>
+                        <span>ساعت:</span>
+                        <span>${time}</span>
+                    </div>
+                    <div>
+                        <span>آدرس مطب:</span>
+                        <strong style="text-align: left;">${data.address}</strong>
+                    </div>
+                </div>
+            `;
+            bookingMessageElement.innerHTML += cardHtml;
+        }
+
+        // 7. مدیریت احراز هویت (مهم برای اتصال Firestore)
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUserId = user.uid;
+                authStatusElement.textContent = `وضعیت: ورود موفق. شناسه کاربر: ${currentUserId.substring(0, 8)}... (کامل در کنسول)`;
+                authStatusElement.className = "message-box message-success";
+                bookingForm.style.display = 'block';
+            } else {
+                try {
+                    authStatusElement.textContent = "در حال ورود به سیستم...";
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } else {
+                        // اگر توکن نبود، ورود ناشناس انجام شود
+                        await signInAnonymously(auth);
+                    }
+                } catch (error) {
+                    console.error("Auth Error:", error);
+                    authStatusElement.textContent = `خطا در ورود: نوبت‌دهی موقتاً غیر فعال است.`;
+                    authStatusElement.className = "message-box message-error";
+                    bookingForm.style.display = 'none';
+                }
+            }
+        });
+
+        // 8. اتصال فرم به تابع رزرو
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('booking-form').addEventListener('submit', bookAppointment);
+        });
+
+    </script>
+</body>
+</html>

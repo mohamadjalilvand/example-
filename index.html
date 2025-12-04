@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ویدئوی آموزشی روانشناسی | مرکز ذهن آگاه</title>
+    
+    <!-- CSS اختصاصی برای استایلینگ زیبا، راست‌چین و ریسپانسیو -->
+    <style>
+        /* تنظیمات عمومی */
+        body {
+            direction: rtl; /* راست‌چین کردن کل صفحه */
+            font-family: Tahoma, 'B Koodak', sans-serif; /* فونت مناسب فارسی */
+            margin: 0;
+            padding: 0;
+            background-color: #f0f4f7; /* رنگ روشن و کمی سرد برای آرامش */
+            color: #333;
+        }
+
+        /* هدر وبسایت */
+        .header {
+            background-color: #006f79; /* سبزآبی تیره، رنگ آرامش بخش روانشناسی */
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .header h1 {
+            margin: 0 0 5px 0;
+            font-size: 2.2rem;
+            letter-spacing: 1px;
+        }
+        
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        /* محفظه اصلی و طرح‌بندی (Desktop) */
+        .container {
+            display: flex; 
+            max-width: 1300px;
+            margin: 30px auto;
+            padding: 0 20px;
+            gap: 25px; /* فاصله بین المان‌های فلکس */
+        }
+
+        /* بخش محتوای اصلی (ویدئو و توضیحات) */
+        .video-section {
+            flex: 3; /* بخش اصلی سه برابر بخش کناری باشد */
+            padding: 25px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .video-section h2 {
+            color: #00796b;
+            border-bottom: 2px solid #e0f2f1;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        /* بخش کناری (سایدبار) */
+        .sidebar {
+            flex: 1; /* بخش کناری یک برابر باشد */
+            padding: 25px;
+            background-color: #e0f7fa; /* رنگ ملایم برای سایدبار */
+            border-radius: 12px;
+            max-height: fit-content; 
+            min-width: 250px;
+        }
+
+        .sidebar h3 {
+            color: #00796b;
+            margin-top: 0;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #b2dfdb;
+        }
+
+        /* تضمین ریسپانسیو بودن و نسبت تصویر ویدئو (16:9) */
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%; /* نسبت ابعاد 16:9 (9 / 16 * 100) */
+            height: 0;
+            overflow: hidden;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .responsive-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* جزئیات متن */
+        .video-description p {
+            line-height: 1.9;
+            text-align: justify;
+            margin-bottom: 15px;
+            font-size: 1.05rem;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 10px 12px;
+            color: #00796b;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .sidebar a:hover {
+            background-color: #b2dfdb;
+            color: #004d40;
+        }
+
+        /* فوتر */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #333;
+            color: white;
+            margin-top: 40px;
+            font-size: 0.9rem;
+        }
+
+        /* 📱 تنظیمات ریسپانسیو برای نمایشگرهای کوچک‌تر (مثل موبایل) */
+        @media (max-width: 850px) {
+            .container {
+                flex-direction: column; /* تغییر جهت از سطر به ستون */
+                margin: 15px auto;
+                padding: 0 10px;
+            }
+
+            .sidebar {
+                order: -1; /* سایدبار در بالای بخش ویدئو قرار گیرد */
+                min-width: unset;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>🌱 مرکز ذهن آگاه</h1>
+        <p>جایی برای رشد و آرامش ذهنی شما</p>
+    </header>
+
+    <main class="container">
+        <!-- بخش اصلی محتوا و ویدئو -->
+        <section class="video-section">
+            <h2>🧠 درک مکانیسم‌های مقابله‌ای (Coping Mechanisms)</h2>
+            
+            <!-- محفظه ویدئو برای تضمین ریسپانسیو بودن -->
+            <div class="video-wrapper">
+                <!-- 
+                    اقدامات ضد-دانلود سمت کاربر (Client-Side):
+                    1. controlsList="nodownload": گزینه دانلود را از منوی سه نقطه مرورگر حذف می‌کند.
+                    2. oncontextmenu="return false;": کلیک راست و نمایش منو در کل پخش‌کننده را غیرفعال می‌کند.
+                    (نکته: امنیت صددرصدی فقط با HLS/DASH و راه‌حل‌های سرور-ساید تضمین می‌شود.)
+                -->
+                <video id="psychology-video" class="responsive-video" controls autoplay muted
+                       controlsList="nodownload" 
+                       oncontextmenu="return false;">
+                    
+                    <!-- 
+                        ارباب، لطفاً آدرس زیر را با لینک ویدئوی واقعی خود جایگزین کنید. 
+                        توجه: برای دانلود نشدن، بهتر است از پروتکل‌های استریمینگ (HLS/DASH) استفاده کنید.
+                    -->
+                    <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+                    
+                    متأسفانه مرورگر شما از پخش ویدئو پشتیبانی نمی‌کند.
+                </video>
+            </div>
+            
+            <article class="video-description">
+                <h3>چکیده محتوا و توضیحات روانشناختی</h3>
+                <p>همه ما در زندگی با چالش‌ها و استرس‌های روزمره مواجه می‌شویم. در این ویدئو، دکتر شفیعی به تفصیل توضیح می‌دهد که **مکانیسم‌های مقابله‌ای** چگونه شکل می‌گیرند، تفاوت بین مکانیزم‌های سازنده (مثل ذهن آگاهی) و ناسازنده (مثل انکار یا فرار) چیست و چگونه می‌توانیم با تشخیص الگوهای رفتاری خود، به یک زندگی باثبات‌تر و آرام‌تر دست یابیم.</p>
+                <p>یادگیری این مکانیزم‌ها نه تنها برای متخصصان، بلکه برای هر فردی که به دنبال خودشناسی و بهبود کیفیت زندگی ذهنی خود است، ضروری می‌باشد.</p>
+            </article>
+        </section>
+        
+        <!-- بخش کناری با موضوعات مرتبط -->
+        <aside class="sidebar">
+            <h3>موضوعات مرتبط در روانشناسی</h3>
+            <ul>
+                <li><a href="#">مدیریت استرس مزمن و فرسودگی شغلی</a></li>
+                <li><a href="#">آشنایی با خطاهای شناختی (Cognitive Biases)</a></li>
+                <li><a href="#">تکنیک‌های تقویت تمرکز و بهره‌وری</a></li>
+                <li><a href="#">نقش کیفیت خواب در سلامت روان</a></li>
+                <li><a href="nobat.html"> صفحه نوبت دهی </a></li>
+            </ul>
+        </aside>
+    </main>
+
+    <footer class="footer">
+        <p>محمد جلیلوند | تلفن: 09021385669 | &copy; کلیه حقوق برای شرکت فناوران هوشمند الماس پارس محفوظ است.</p>
+    </footer>
+
+    <script>
+        // این بخش جاوا اسکریپت تنها برای تکمیل کد و نمایش توضیحات است.
+        // ویژگی oncontextmenu در تگ video عملاً کار جلوگیری از کلیک راست را انجام داده است.
+        console.log("پخش‌کننده ویدئو با ویژگی‌های ضد دانلود اولیه بارگذاری شد.");
+    </script>
+</body>
+</html>
