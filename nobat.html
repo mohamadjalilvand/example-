@@ -150,17 +150,16 @@
 </head>
 <body>
     <header class="header">
-        <h1>🗓️ سیستم نوبت‌دهی آنلاین</h1>
-        <p>لطفاً فرم زیر را برای رزرو نوبت تکمیل کنید.</p>
+        <h1>🗓️ سیستم نوبت‌دهی آنلاین (نمونه ایستا)</h1>
+        <p>لطفاً فرم زیر را برای رزرو نوبت تکمیل کنید. این سیستم متکی بر اینترنت نیست.</p>
     </header>
 
     <main class="container">
-        <!-- بخش نوبت دهی مطب -->
         <section id="appointment-section" class="section-card">
             <h2>درخواست نوبت مشاوره حضوری</h2>
-            <p id="auth-status" class="message-error">در حال اتصال به سیستم نوبت‌دهی (لطفاً صبر کنید)...</p>
+            <!-- پیام وضعیت اتصال حذف شد -->
 
-            <form id="booking-form" style="display: none;">
+            <form id="booking-form">
                 <div class="form-group">
                     <label for="fullName">نام و نام خانوادگی:</label>
                     <input type="text" id="fullName" placeholder="مانند: علی حسینی" required>
@@ -174,6 +173,7 @@
                     <textarea id="description" rows="3" placeholder="مثلاً: اضطراب اجتماعی"></textarea>
                 </div>
                 
+                <!-- دکمه رزرو که مستقیماً فعال است -->
                 <button type="submit" class="btn-submit" id="book-button">درخواست نوبت مشاوره</button>
                 
                 <div id="booking-message"></div>
@@ -181,31 +181,13 @@
         </section>
     </main>
 
-  <footer class="footer">
+     <footer class="footer">
         <p>محمد جلیلوند | تلفن: 09021385669 | &copy; کلیه حقوق برای شرکت فناوران هوشمند الماس پارس محفوظ است.</p>
     </footer>
 
-    <!-- Firebase Imports and Logic (MUST be type="module") -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, collection, query, limit, orderBy, serverTimestamp, setLogLevel, getDocs, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // --- متغیرهای عمومی Canvas (ضروری) ---
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        
-        // تنظیمات فایربیس
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        setLogLevel('debug'); 
-
-        let currentUserId = null;
-
+    <!-- منطق جاوااسکریپت ایستا (بدون Firebase) -->
+    <script>
         // عناصر UI
-        const authStatusElement = document.getElementById('auth-status');
         const bookingForm = document.getElementById('booking-form');
         const bookButton = document.getElementById('book-button');
         const bookingMessageElement = document.getElementById('booking-message');
@@ -215,9 +197,6 @@
         const APPOINTMENT_TIMES = ["10:00", "11:00", "12:00", "15:00", "16:00"]; // ساعات کاری
         // روزهای کاری (0=یکشنبه تا 6=شنبه). 1 تا 4 یعنی دوشنبه تا پنج‌شنبه
         const WORKING_DAYS = [1, 2, 3, 4]; 
-        
-        // مسیر Firestore (عمومی برای اشتراک گذاری نوبت ها بین کاربران)
-        const APPOINTMENTS_PATH = `artifacts/${appId}/public/data/appointments`;
 
 
         // 1. توابع کمکی تاریخ
@@ -225,10 +204,6 @@
             // نمایش تاریخ شمسی با جزئیات روز و ماه
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             return gregorianDate.toLocaleDateString('fa-IR', options);
-        }
-
-        function getJalaliDay(gregorianDate) {
-            return gregorianDate.toLocaleDateString('fa-IR', { weekday: 'long' });
         }
 
         function isWorkingDay(date) {
@@ -242,7 +217,7 @@
             return result;
         }
         
-        // 2. تابع ساخت کد عددی نوبت
+        // 2. تابع ساخت کد عددی نوبت (ایستا)
         function generateNumericId(length = 6) {
             let result = '';
             const characters = '0123456789';
@@ -250,42 +225,35 @@
             for (let i = 0; i < length; i++) {
                 // اطمینان از اینکه رقم اول صفر نباشد تا طول رشته حفظ شود
                 if (i === 0) {
-                    // برای رقم اول، عدد بین ۱ تا ۹
                     result += characters.charAt(Math.floor(Math.random() * 9) + 1); 
                 } else {
-                    // برای بقیه ارقام، عدد بین ۰ تا ۹
                     result += characters.charAt(Math.floor(Math.random() * charactersLength));
                 }
             }
             return result;
         }
 
-        // 3. منطق اصلی تخصیص نوبت
-        function getNextAvailableSlot(lastAppointmentTimestamp) {
-            // نوبت‌دهی باید از آینده شروع شود
-            let lastDate = new Date();
-            let lastTimeIndex = -1; 
+        // 3. منطق اصلی تخصیص نوبت (ایستا - همیشه از زمان فعلی شروع می‌کند)
+        function getNextAvailableSlot() {
+            let currentDate = new Date();
+            currentDate.setSeconds(0, 0); 
             
-            if (lastAppointmentTimestamp) {
-                lastDate = lastAppointmentTimestamp.toDate();
-                // پیدا کردن ایندکس زمانی نوبت آخر
-                const bookedTime = lastDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-                lastTimeIndex = APPOINTMENT_TIMES.findIndex(t => t === bookedTime);
-            }
-
-            let currentDate = new Date(lastDate);
-            currentDate.setHours(0, 0, 0, 0); 
+            let nextTimeIndex = 0;
             
-            let nextTimeIndex = lastTimeIndex + 1;
-
-            // اگر نوبت آخر مال روز قبل بوده، یا هنوز نوبتی رزرو نشده، از نوبت اول امروز شروع می‌کنیم
-            if (lastTimeIndex === -1 || currentDate.getTime() < new Date().setHours(0,0,0,0)) {
-                currentDate = new Date(); // شروع از زمان حال
-                currentDate.setSeconds(0, 0); 
-                nextTimeIndex = 0;
-            } else if (nextTimeIndex > 0 && currentDate.getTime() < new Date().setHours(0,0,0,0)) {
-                 // اگر نوبت آخر مربوط به روزهای قبل است، از اولین ساعت روز بعد شروع کن
+            // ابتدا ساعت جاری را در لیست پیدا می‌کنیم تا از زمان حال شروع کنیم
+            const currentTime = currentDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+            // پیدا کردن اولین ساعتی که از زمان فعلی گذشته است
+            nextTimeIndex = APPOINTMENT_TIMES.findIndex(time => {
+                const [h, m] = time.split(':').map(Number);
+                const proposedDate = new Date(currentDate);
+                proposedDate.setHours(h, m, 0, 0);
+                return proposedDate.getTime() > new Date().getTime();
+            });
+            
+            // اگر در امروز ساعتی پیدا نشد، از اولین ساعت روز کاری بعدی شروع می‌کنیم
+            if (nextTimeIndex === -1) {
                 currentDate = addDays(currentDate, 1);
+                currentDate.setHours(0, 0, 0, 0);
                 nextTimeIndex = 0;
             }
 
@@ -295,12 +263,14 @@
                 // اگر ساعت کاری روز تمام شده باشد، به روز بعد می‌رویم
                 if (nextTimeIndex >= APPOINTMENT_TIMES.length) {
                     currentDate = addDays(currentDate, 1);
+                    currentDate.setHours(0, 0, 0, 0);
                     nextTimeIndex = 0;
                 }
 
                 // اگر روز جاری روز کاری نبود، به روز بعد می‌رویم
                 if (!isWorkingDay(currentDate)) {
                     currentDate = addDays(currentDate, 1);
+                    currentDate.setHours(0, 0, 0, 0);
                     nextTimeIndex = 0; 
                     continue; 
                 }
@@ -328,15 +298,11 @@
             element.className = `message-box message-${type}`;
         }
         
-        // 5. تابع اصلی رزرو نوبت
+        // 5. تابع اصلی رزرو نوبت (کاملا ایستا)
         async function bookAppointment(event) {
             event.preventDefault();
             
-            if (!currentUserId) {
-                displayMessage(bookingMessageElement, "خطا: احراز هویت کاربر انجام نشده است.", 'error');
-                return;
-            }
-
+            // غیرفعال کردن دکمه هنگام پردازش برای UX بهتر
             bookButton.disabled = true;
             bookButton.textContent = "در حال رزرو...";
             bookingMessageElement.innerHTML = ''; 
@@ -350,51 +316,28 @@
                     throw new Error("لطفاً نام کامل و شماره تماس را وارد کنید.");
                 }
 
-                // مرحله اول: پیدا کردن آخرین نوبت رزرو شده
-                let lastAppointmentTimestamp = null;
-                const lastQuery = query(
-                    collection(db, APPOINTMENTS_PATH),
-                    orderBy('appointmentDate', 'desc'),
-                    limit(1)
-                );
-                
-                const querySnapshot = await getDocs(lastQuery);
-                if (!querySnapshot.empty) {
-                    lastAppointmentTimestamp = querySnapshot.docs[0].data().appointmentDate;
-                }
+                // مرحله اول: محاسبه نوبت در دسترس بعدی (ایستا)
+                const nextDate = getNextAvailableSlot();
 
-                // مرحله دوم: محاسبه نوبت در دسترس بعدی
-                const nextDate = getNextAvailableSlot(lastAppointmentTimestamp);
-
-                // مرحله سوم: ساختار داده‌های نوبت جدید
-                const newAppointmentRef = doc(collection(db, APPOINTMENTS_PATH)); 
+                // مرحله دوم: ساختار داده‌های نوبت جدید (ایستا)
                 const appointmentData = {
                     fullName,
                     phoneNumber,
                     description,
-                    userId: currentUserId,
-                    appointmentDate: nextDate, // تاریخ و زمان رزرو شده (Date Object)
-                    bookedAt: serverTimestamp(),
+                    appointmentDate: nextDate, // Date Object
                     appointmentId: generateNumericId(6), // کد نوبت ۶ رقمی عددی جدید
                     address: APPOINTMENT_ADDRESS,
-                    status: 'Pending'
                 };
                 
-                // مرحله چهارم: ذخیره داده در Firestore
-                await setDoc(newAppointmentRef, appointmentData);
-
-                // مرحله پنجم: نمایش تاییدیه
+                // مرحله سوم: نمایش تاییدیه
                 displayMessage(bookingMessageElement, "نوبت شما با موفقیت رزرو شد!", 'success');
                 renderAppointmentCard(appointmentData);
 
             } catch (error) {
                 console.error("Booking Error:", error);
-                let errorMessage = error.message || 'خطای ناشناخته در اتصال به پایگاه داده.';
-                if (errorMessage.includes("permission denied")) {
-                     errorMessage = "خطای دسترسی: احراز هویت شما کامل نیست یا قوانین امنیتی نقض شده است.";
-                }
-                displayMessage(bookingMessageElement, `خطا در رزرو نوبت: ${errorMessage}`, 'error');
+                displayMessage(bookingMessageElement, `خطا در تکمیل فرم: ${error.message}`, 'error');
             } finally {
+                // فعال کردن مجدد دکمه
                 bookButton.disabled = false;
                 bookButton.textContent = "درخواست نوبت مشاوره";
             }
@@ -402,10 +345,9 @@
 
         // 6. تابع رندر کارت تاییدیه
         function renderAppointmentCard(data) {
-            // data.appointmentDate در زمان ثبت موفق، یک آبجکت Date است، در زمان لود از فایربیس، یک Timestamp است.
-            const dateObj = data.appointmentDate.toDate ? data.appointmentDate.toDate() : data.appointmentDate; 
+            // data.appointmentDate اکنون همیشه یک آبجکت Date است
+            const dateObj = data.appointmentDate; 
             const jalaliDate = toJalali(dateObj);
-            // const dayName = getJalaliDay(dateObj); // حذف شد - نام روز در jalaliDate موجود است
             const time = dateObj.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit', hour12: false }); 
 
             const cardHtml = `
@@ -423,7 +365,6 @@
                         <span>تاریخ:</span>
                         <span>${jalaliDate}</span>
                     </div>
-                    <!-- نمایش روز حذف شد زیرا تابع toJalali آن را در قسمت 'تاریخ' لحاظ می‌کند -->
                     <div>
                         <span>ساعت:</span>
                         <span>${time}</span>
@@ -437,32 +378,7 @@
             bookingMessageElement.innerHTML += cardHtml;
         }
 
-        // 7. مدیریت احراز هویت (مهم برای اتصال Firestore)
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUserId = user.uid;
-                authStatusElement.textContent = `وضعیت: ورود موفق. شناسه کاربر: ${currentUserId.substring(0, 8)}... (کامل در کنسول)`;
-                authStatusElement.className = "message-box message-success";
-                bookingForm.style.display = 'block';
-            } else {
-                try {
-                    authStatusElement.textContent = "در حال ورود به سیستم...";
-                    if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                    } else {
-                        // اگر توکن نبود، ورود ناشناس انجام شود
-                        await signInAnonymously(auth);
-                    }
-                } catch (error) {
-                    console.error("Auth Error:", error);
-                    authStatusElement.textContent = `خطا در ورود: نوبت‌دهی موقتاً غیر فعال است.`;
-                    authStatusElement.className = "message-box message-error";
-                    bookingForm.style.display = 'none';
-                }
-            }
-        });
-
-        // 8. اتصال فرم به تابع رزرو
+        // 7. اتصال فرم به تابع رزرو
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('booking-form').addEventListener('submit', bookAppointment);
         });
